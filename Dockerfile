@@ -15,8 +15,7 @@ RUN apt-get update && apt-get install -y \
 COPY package.json package-lock.json* ./
 
 # Install dependencies
-RUN npm install --production=false
-
+RUN npm install
 # Copy source code
 COPY . .
 
