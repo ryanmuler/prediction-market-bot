@@ -15,8 +15,7 @@ RUN apt-get update && apt-get install -y \
                 COPY . .
 
                 # Install ALL dependencies (including devDependencies for build)
-                RUN npm ci
-
+RUN npm install
                 # Build the application
                 RUN npm run build
 
