@@ -7,23 +7,21 @@ WORKDIR /app
 # Install system dependencies
 RUN apt-get update && apt-get install -y \
     python3 \
-    make \
-    g++ \
-    && rm -rf /var/lib/apt/lists/*
+        make \
+            g++ \
+                && rm -rf /var/lib/apt/lists/*
 
-# Copy package files
-COPY package.json package-lock.json* ./
+                # Copy all source code
+                COPY . .
 
-# Install dependencies
-RUN npm install
-# Copy source code
-COPY . .
+                # Install ALL dependencies (including devDependencies for build)
+                RUN npm ci
 
-# Build the application
-RUN npm run build
+                # Build the application
+                RUN npm run build
 
-# Expose port
-EXPOSE 3000
+                # Expose port
+                EXPOSE 3000
 
-# Start the application
-CMD ["npm", "start"]
+                # Start the application
+                CMD ["npm", "start"]
