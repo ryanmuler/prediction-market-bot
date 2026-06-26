@@ -6,8 +6,11 @@ RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt
 ENV NODE_ENV=development
 # Copy all source code
 COPY . .
-# Install all dependencies (cache-bust v5)
+# Remove any existing lockfile/modules and do a clean full install (cache-bust v6)
+RUN rm -rf package-lock.json node_modules
 RUN npm install --include=dev --legacy-peer-deps --no-audit --no-fund
+# Verify a key build-time dependency installed correctly
+RUN ls node_modules/@hono/vite-dev-server/package.json && echo 'hono vite-dev-server OK'
 # Build frontend with vite (invoke binary directly to avoid PATH issues)
 RUN node node_modules/vite/bin/vite.js build
 # Bundle the server with esbuild
