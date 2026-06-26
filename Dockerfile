@@ -3,14 +3,11 @@ FROM node:20-slim
 WORKDIR /app
 # Install system dependencies needed for native modules
 RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
-# Ensure dev dependencies are installed during the build stage
 ENV NODE_ENV=development
 # Copy all source code
 COPY . .
-# Install ALL dependencies (cache-bust v2)
-RUN npm install --include=dev --legacy-peer-deps
-# Safety net: guarantee build tools exist
-RUN ls node_modules/.bin/vite || npm install vite esbuild --legacy-peer-deps
+# Install dependencies; print npm debug log on failure (cache-bust v3)
+RUN npm install --include=dev --legacy-peer-deps --no-audit --no-fund || (echo '===== NPM DEBUG LOG =====' && cat /root/.npm/_logs/*-debug-0.log && exit 1)
 # Build the frontend and server bundle
 RUN npm run build
 # Switch to production for runtime
