@@ -1,19 +1,19 @@
 # Prediction Market Bot - Dockerfile for Railway
 FROM node:20-slim
 WORKDIR /app
-# Install system dependencies
+# Install system dependencies needed for native modules
 RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
+# Ensure dev dependencies are installed during the build stage
+ENV NODE_ENV=development
 # Copy all source code
 COPY . .
-# Force install of ALL dependencies including devDependencies (vite, esbuild)
-ENV NODE_ENV=development
-ENV NPM_CONFIG_PRODUCTION=false
+# Install ALL dependencies (cache-bust v2)
 RUN npm install --include=dev --legacy-peer-deps
-# Build the application (frontend + server bundle)
+# Safety net: guarantee build tools exist
+RUN ls node_modules/.bin/vite || npm install vite esbuild --legacy-peer-deps
+# Build the frontend and server bundle
 RUN npm run build
-# Runtime environment
+# Switch to production for runtime
 ENV NODE_ENV=production
-# Expose port
 EXPOSE 3000
-# Start the application
 CMD ["npm", "start"]
