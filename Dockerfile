@@ -5,10 +5,11 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 # Copy all source code
 COPY . .
-# Force install of devDependencies (vite, esbuild) regardless of NODE_ENV
+# Force install of ALL dependencies including devDependencies (vite, esbuild)
 ENV NODE_ENV=development
-RUN npm install --include=dev
-# Build the application
+ENV NPM_CONFIG_PRODUCTION=false
+RUN npm install --include=dev --legacy-peer-deps
+# Build the application (frontend + server bundle)
 RUN npm run build
 # Runtime environment
 ENV NODE_ENV=production
