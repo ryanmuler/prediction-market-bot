@@ -4,10 +4,14 @@ WORKDIR /app
 # Install system dependencies needed for native modules
 RUN apt-get update && apt-get install -y python3 make g++ && rm -rf /var/lib/apt/lists/*
 ENV NODE_ENV=development
+# Ensure locally installed binaries are on PATH
+ENV PATH=/app/node_modules/.bin:$PATH
 # Copy all source code
 COPY . .
-# Install dependencies; print npm debug log on failure (cache-bust v3)
-RUN npm install --include=dev --legacy-peer-deps --no-audit --no-fund || (echo '===== NPM DEBUG LOG =====' && cat /root/.npm/_logs/*-debug-0.log && exit 1)
+# Install all dependencies (cache-bust v4)
+RUN npm install --include=dev --legacy-peer-deps --no-audit --no-fund
+# Diagnostic: show whether build tools landed in node_modules
+RUN echo '--- checking vite ---' && (ls -la node_modules/.bin/ | grep -E 'vite|esbuild' || echo 'NO VITE/ESBUILD IN .bin') && (ls node_modules/vite/package.json && echo 'vite package present' || echo 'vite package MISSING')
 # Build the frontend and server bundle
 RUN npm run build
 # Switch to production for runtime
